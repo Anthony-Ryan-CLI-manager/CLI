@@ -1,8 +1,8 @@
 import java.util.ArrayList;
+import java.util.List;
+
 
 public class ContactsManager {
-
-    public class ContactsManager {
         private List<Contact> contacts = new ArrayList<>();
 
         public void addContact(Contact contact) {
@@ -28,4 +28,4 @@ public class ContactsManager {
     }
 
 
-}
+
