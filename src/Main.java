@@ -9,7 +9,7 @@ public class Main {
         public static void main(String[] args) throws IOException {
 
             String directory = "data";
-            String filename = "info.txt";
+            String filename = "contacts.txt";
 
             Path dataDirectory = Paths.get(directory);
             Path dataFile = Paths.get(directory, filename);
