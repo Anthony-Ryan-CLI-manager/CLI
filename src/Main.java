@@ -1,8 +1,27 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
 
-        public static void main(String[] args) {
+        public static void main(String[] args) throws IOException {
+
+            String directory = "data";
+            String filename = "contacts.txt";
+
+            Path dataDirectory = Paths.get(directory);
+            Path dataFile = Paths.get(directory, filename);
+
+            if (Files.notExists(dataDirectory)) {
+                Files.createDirectories(dataDirectory);
+            }
+
+            if (!Files.exists(dataFile)) {
+                Files.createFile(dataFile);
+            }
+
             ContactsManager manager = new ContactsManager();
             Scanner scanner = new Scanner(System.in);
 
@@ -52,13 +71,4 @@ public class Main {
         }
     }
 
-        while (true) {
-            System.out.println("1. Add a new contact.");
-            System.out.println("2. View Contacts.");
-            System.out.println("3. Search a contact by name.");
-            System.out.println("4. Delete an existing contact.");
-            System.out.println("5. Exit: Close the application and save your contacts to a file (contacts.txt).\n");
-        }
-    }
-}
 
