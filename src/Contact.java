@@ -12,7 +12,7 @@ public class Contact {
     }
 
     public String getPhoneNumber() {
-        return formatPhoneNumber(phoneNumber); // Bonus: Format the phone number
+        return formatPhoneNumber(phoneNumber);
     }
 
     private String formatPhoneNumber(String phoneNumber) {

@@ -1,6 +1,8 @@
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.*;
+import java.util.Map;
+
 
 public class ContactWriter {
     public static final Logger logger = Logger.getLogger(ContactWriter.class.getName());
@@ -35,7 +37,7 @@ public class ContactWriter {
                 Files.createDirectories(Paths.get("data"));
             }
 
-            writeContactsToFile(contacts, filepath); // Call the writeContactsToFile method
+            writeContactsToFile(contacts, filepath);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error writing contacts to file", e);
         }
