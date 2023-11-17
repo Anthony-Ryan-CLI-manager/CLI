@@ -1,6 +1,6 @@
 public class Contact {
-    public String name;
-    public String phoneNumber;
+    private String name;
+    private String phoneNumber;
 
     public Contact(String name, String phoneNumber) {
         this.name = name;
@@ -12,6 +12,17 @@ public class Contact {
     }
 
     public String getPhoneNumber() {
-        return phoneNumber;
+        return formatPhoneNumber(phoneNumber);
+    }
+
+    private String formatPhoneNumber(String phoneNumber) {
+        String digitsOnly = phoneNumber.replaceAll("[0-9]", "");
+        if (digitsOnly.length() == 10) {
+            return digitsOnly.substring(0, 3) + "-" + digitsOnly.substring(3, 6) + "-" + digitsOnly.substring(6);
+        } else if (digitsOnly.length() == 7) {
+            return digitsOnly.substring(0, 3) + "-" + digitsOnly.substring(3);
+        } else {
+            return phoneNumber;
+        }
     }
 }

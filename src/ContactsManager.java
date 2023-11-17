@@ -1,91 +1,88 @@
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 
 public class ContactsManager {
-    private static final Logger LOGGER = Logger.getLogger(ContactWriter.class.getName());
-    private List<Contact> contacts = new ArrayList<>();
-    private Path filePath = Paths.get("data/contacts.txt");
-
-    public ContactsManager(List<Contact> contacts, String filePath) {
-        this.contacts = contacts;
-        this.filePath = Path.of(filePath);
-    }
+    private Map<String, String> contacts;
+    private Path filepath;
 
     public ContactsManager() {
-
+        this.filepath = Paths.get("data", "contacts.txt");
+        this.contacts = loadContacts(filepath);
     }
 
-    public void addContact(Contact contact) {
-        contacts.add(contact);
-        updateFile();
-    }
-//        updateFile();
-
-
-//            else everything
-
-
-    public void updateFile() {
+    private Map<String, String> loadContacts(Path filepath) {
         try {
-            List<String> lines = new ArrayList<>();
-            for (Contact contact : contacts) {
-                lines.add(contact.getName() + ": " + contact.getPhoneNumber());
+            if (Files.exists(filepath)) {
+                return Files.lines(filepath)
+                        .map(line -> line.split("\\s*\\|\\s*"))
+                        .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
             }
-            Path file = Paths.get(filePath.toUri());
-            Files.write(file, lines, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            Logger LOGGER = Logger.getLogger(getClass().getName());
-            LOGGER.log(Level.SEVERE, "Error updating contacts file", e);
+            e.printStackTrace();
         }
-    }
-
-    public void deleteContact(String name) {
-        contacts.removeIf(contact -> contact.getName().equals(name));
-        updateFile();
-    }
-//try readAllLines in the files class which will return a list and then get it to read from the list.
-    public Contact searchContact(String name) {
-        return contacts.stream()
-                .filter(contact -> contact.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+        return new HashMap<>();
     }
 
     public void displayContacts() {
-        System.out.printf("%-15s | %-15s |%n", "Name", "Phone number");
-        System.out.println("----------------------------------------");
+        int maxNameLength = 0;
+        int maxPhoneNumberLength = 0;
 
-            try {
-                List<String> lines = Files.readAllLines(filePath);
-                for (String line : lines) {
-                    String[] parts = line.split(": ", 2);
-                    if (parts.length < 2) {
-                        System.out.println("Invalid contact format" + line);
-                        continue;
-
-                    }
-                    String name = parts[0];
-                    String phoneNumber = parts[1];
-                    System.out.printf("%-15s | %-15s |%n", name, phoneNumber);
-                }
-            } catch (IOException e) {
-                System.out.println("Uh oh, something went wrong: " + e.getMessage());
-                System.out.println("Here is some more detail:");
-                e.printStackTrace();
-            }
+        for (Map.Entry<String, String> entry : contacts.entrySet()) {
+            maxNameLength = Math.max(maxNameLength, entry.getKey().length());
+            maxPhoneNumberLength = Math.max(maxPhoneNumberLength, entry.getValue().length());
         }
 
+        System.out.printf("%-" + (maxNameLength + 2) + "s | %-" + (maxPhoneNumberLength + 2) + "s%n", "Name", "Phone number");
+        System.out.println(new String(new char[maxNameLength + maxPhoneNumberLength + 25]).replace('\0', '-'));
 
+        int finalMaxNameLength = maxNameLength;
+        int finalMaxPhoneNumberLength = maxPhoneNumberLength;
+
+        contacts.forEach((name, phoneNumber) -> {
+            Contact contact = new Contact(name, phoneNumber);
+            System.out.printf("%-" + (finalMaxNameLength + 2) + "s | %-" + (finalMaxPhoneNumberLength + 2) + "s%n",
+                    contact.getName(), contact.getPhoneNumber());
+        });
     }
 
+    public void addContact(Contact contact) {
+        String existingContact = contacts.get(contact.getName());
+        if (existingContact == null || askToOverwrite()) {
+            contacts.put(contact.getName(), contact.getPhoneNumber());
+            ContactWriter.writeContactsToFile(contacts, filepath);
+            System.out.println("Contact added successfully.");
+        } else {
+            System.out.println("Contact not added.");
+        }
+    }
 
+    public Contact searchContact(String name) {
+        String phoneNumber = contacts.get(name);
+        if (phoneNumber != null) {
+            return new Contact(name, phoneNumber);
+        }
+        return null;
+    }
 
+    public void deleteContact(String name) {
+        if (contacts.containsKey(name)) {
+            contacts.remove(name);
+            ContactWriter.writeContactsToFile(contacts, filepath);
+            System.out.println("Contact deleted successfully.");
+        } else {
+            System.out.println("Contact not found.");
+        }
+    }
 
+        private boolean askToOverwrite() {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("There's already a contact with this name. Do you want to overwrite it? (Yes/No): ");
+            String response = scanner.nextLine().toLowerCase();
+            return response.equals("yes");
+        }
+}
