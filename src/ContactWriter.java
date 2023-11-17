@@ -4,6 +4,24 @@ import java.util.logging.*;
 
 public class ContactWriter {
     public static final Logger logger = Logger.getLogger(ContactWriter.class.getName());
+
+    public static void writeContactsToFile(Map<String, String> contacts, Path filepath) {
+        try {
+            if (Files.notExists(filepath.getParent())) {
+                Files.createDirectories(filepath.getParent());
+            }
+
+            List<String> lines = new ArrayList<>();
+            for (Map.Entry<String, String> entry : contacts.entrySet()) {
+                String line = entry.getKey() + " | " + entry.getValue();
+                lines.add(line);
+            }
+            Files.write(filepath, lines);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error writing contacts to file", e);
+        }
+    }
+
     public static void main(String[] args) {
         Map<String, String> contacts = new HashMap<>();
         contacts.put("Joe", "123-456-7890");
@@ -17,12 +35,7 @@ public class ContactWriter {
                 Files.createDirectories(Paths.get("data"));
             }
 
-            List<String> lines = new ArrayList<>();
-            for (Map.Entry<String, String> entry : contacts.entrySet()) {
-                String line = entry.getKey() + " | " + entry.getValue();
-                lines.add(line);
-            }
-            Files.write(filepath, lines);
+            writeContactsToFile(contacts, filepath); // Call the writeContactsToFile method
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error writing contacts to file", e);
         }
